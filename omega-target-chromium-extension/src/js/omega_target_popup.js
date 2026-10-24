@@ -8,10 +8,11 @@ function callBackgroundNoReply(method, args, cb) {
   if (cb) return cb();
 }
 
-function callBackground(method, args, cb) {
+function callBackground(method, args, cb, refreshActivePage) {
   chrome.runtime.sendMessage({
     method: method,
     args: args,
+    refreshActivePage: !!refreshActivePage,
   }, function(response) {
     if (chrome.runtime.lastError != null)
       return cb && cb(chrome.runtime.lastError)
@@ -35,6 +36,12 @@ OmegaTargetPopup = {
   },
   applyProfile: function (name, cb) {
     callBackgroundNoReply('applyProfile', [name], cb);
+  },
+  getProxyScenes: function (cb) {
+    callBackground('getProxyScenes', [], cb);
+  },
+  setActiveProxyScene: function (scene, cb) {
+    callBackground('setActiveProxyScene', [scene], cb, true);
   },
   openOptions: function (hash, cb) {
     var options_url = chrome.runtime.getURL('options.html');

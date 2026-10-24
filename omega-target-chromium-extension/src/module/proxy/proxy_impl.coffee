@@ -49,7 +49,9 @@ class ProxyImpl
         profilePacCache.delete(cachedProfile)
     )
     profilePac = profilePacCache.get(profile)
-    profilePacKey = referenced_profiles.map(
+    sceneKey = (options['-activeProxyScene'] ? '') + '/' +
+      (options['-defaultProxyScene'] ? '')
+    profilePacKey = sceneKey + ':' + referenced_profiles.map(
       (_profile) ->
         revision = _profile.revision or 1
         # remote pacScript and rule list use sha256 to  ensue uniqueId

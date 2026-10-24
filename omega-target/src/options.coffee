@@ -412,6 +412,19 @@ class Options
   ###
   getAll: -> @_options
 
+  getProxyScenes: ->
+    scenes: @_options['-proxyScenes'] ? []
+    active: @_options['-activeProxyScene'] ? ''
+    defaultScene: @_options['-defaultProxyScene'] ? ''
+
+  setActiveProxyScene: (scene) ->
+    scene ?= ''
+    valid = not scene or (@_options['-proxyScenes'] ? []).some((item) ->
+      item.id == scene)
+    return Promise.reject(new Error('Unknown proxy scene')) unless valid
+    return Promise.resolve() if @_options['-activeProxyScene'] == scene
+    @_setOptions({'-activeProxyScene': scene})
+
   ###*
   # Get profile by name.
   # @returns {?{}} The profile, or undefined if no such profile.
@@ -461,7 +474,9 @@ class Options
           profilesChanged = true
           if value.profileType is 'RuleListProfile'
             value.pacScript = generateProfileTempPac(value)
-        if key is '-builtinProfiles'
+        if key is '-builtinProfiles' or
+            (key in ['-activeProxyScene', '-defaultProxyScene'] and
+              @_currentProfileName)
           currentProfileAffected = 'changed'
         @_options[key] = value
       if not currentProfileAffected and @_watchingProfiles[key]
@@ -653,14 +668,15 @@ class Options
   ###
   applyProfile: (name, options) ->
     @log.method('Options#applyProfile', this, arguments)
-    profile = OmegaPac.Profiles.byName(name, @_options)
+    @_runtimeOptions = OmegaPac.Profiles.forSceneOptions(@_options)
+    profile = OmegaPac.Profiles.byName(name, @_runtimeOptions)
     if not profile
       return Promise.reject new ProfileNotExistError(name)
 
     @_currentProfileName = profile.name
     @_isSystem = options?.system || (profile.profileType == 'SystemProfile')
-    @_watchingProfiles = OmegaPac.Profiles.allReferenceSet(profile, @_options,
-      profileNotFound: @_profileNotFound.bind(this))
+    @_watchingProfiles = OmegaPac.Profiles.allReferenceSet(
+      profile, @_runtimeOptions, profileNotFound: @_profileNotFound.bind(this))
 
     @_state.set({
       'currentProfileName': @_currentProfileName
@@ -694,11 +710,12 @@ class Options
         OmegaPac.Profiles.updateRevision(@_tempProfile)
 
       @_watchingProfiles = OmegaPac.Profiles.allReferenceSet(@_tempProfile,
-        @_options, profileNotFound: @_profileNotFound.bind(this))
+        @_runtimeOptions, profileNotFound: @_profileNotFound.bind(this))
 
-      applyProxy = @proxyImpl.applyProfile(@_tempProfile, profile, @_options)
+      applyProxy = @proxyImpl.applyProfile(
+        @_tempProfile, profile, @_runtimeOptions)
     else
-      applyProxy = @proxyImpl.applyProfile(profile, profile, @_options)
+      applyProxy = @proxyImpl.applyProfile(profile, profile, @_runtimeOptions)
 
     return applyProxy if options? and options.update == false
 
@@ -1091,7 +1108,8 @@ class Options
       if @_tempProfileActive
         @_tempProfile
       else
-        OmegaPac.Profiles.byName(@_currentProfileName, @_options)
+        OmegaPac.Profiles.byName(@_currentProfileName,
+          @_runtimeOptions ? @_options)
     while profile
       lastProfile = profile
       result = OmegaPac.Profiles.match(profile, request)
@@ -1103,7 +1121,7 @@ class Options
         next = OmegaPac.Profiles.nameAsKey(result.profileName)
       else
         break
-      profile = OmegaPac.Profiles.byKey(next, @_options)
+      profile = OmegaPac.Profiles.byKey(next, @_runtimeOptions ? @_options)
     Promise.resolve(profile: lastProfile, results: results)
 
   ###*

@@ -108,6 +108,30 @@ module.exports = exports =
       decorateCustomBuiltinProfiles(profile, options)
     profile
 
+  # Scene overrides keep the profile name stable, so switch rules and rule lists
+  # continue to refer to the same FixedProfile in every environment.
+  forScene: (profile, options) ->
+    return profile unless profile?.profileType == 'FixedProfile'
+    scene = options?['-activeProxyScene'] || options?['-defaultProxyScene']
+    override = profile.sceneProfiles?[scene]
+    return profile unless scene and override
+    resolved = Object.assign({}, profile, override)
+    delete resolved.sceneProfiles
+    resolved.name = profile.name
+    resolved.profileType = profile.profileType
+    resolved.color = profile.color
+    resolved.revision = profile.revision
+    resolved
+
+  forSceneOptions: (options) ->
+    return options unless options?['-activeProxyScene'] or
+      options?['-defaultProxyScene']
+    resolved = Object.assign({}, options)
+    exports.each options, (key, profile) ->
+      if not profile.builtin
+        resolved[key] = exports.forScene(profile, options)
+    resolved
+
   each: (options, callback) ->
     charCodePlus = '+'.charCodeAt(0)
     for key, profile of options when key.charCodeAt(0) == charCodePlus

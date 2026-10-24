@@ -47,6 +47,26 @@ describe 'PacGenerator', ->
     func = eval("(function () { #{pac}\n return FindProxyForURL; })()")
     result = func('http://www.example.com/', 'www.example.com')
     result.should.equal('PROXY 127.0.0.1:8888')
+  it 'should use the selected scene for an Auto Switch result', ->
+    sceneOptions = Object.assign({}, options)
+    sceneOptions['-activeProxyScene'] = 'office'
+    sceneOptions['+proxy'] = Object.assign({}, options['+proxy'],
+      sceneProfiles:
+        office:
+          fallbackProxy: {scheme: 'http', host: '10.0.0.2', port: 9090}
+    )
+    ast = PacGenerator.script(sceneOptions, 'auto')
+    pac = ast.print_to_string(beautify: true, comments: true)
+    func = eval("(function () { #{pac}\n return FindProxyForURL; })()")
+    func('http://www.example.com/', 'www.example.com')
+      .should.equal('PROXY 10.0.0.2:9090')
+    sceneOptions['-activeProxyScene'] = ''
+    sceneOptions['-defaultProxyScene'] = 'office'
+    ast = PacGenerator.script(sceneOptions, 'auto')
+    pac = ast.print_to_string(beautify: true, comments: true)
+    func = eval("(function () { #{pac}\n return FindProxyForURL; })()")
+    func('http://www.example.com/', 'www.example.com')
+      .should.equal('PROXY 10.0.0.2:9090')
   it 'should be able to compress pac scripts', ->
     ast = PacGenerator.script(options, 'auto')
     pac = PacGenerator.compress(ast).print_to_string()

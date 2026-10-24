@@ -23,8 +23,11 @@ module.exports =
     compressed_ast
 
   script: (options, profile, args) ->
+    options = Profiles.forSceneOptions(options)
     if typeof profile == 'string'
       profile = Profiles.byName(profile, options)
+    else if profile?.name and options[Profiles.nameAsKey(profile.name)]?
+      profile = Profiles.byName(profile.name, options)
     refs = Profiles.allReferenceSet(profile, options,
       profileNotFound: args?.profileNotFound)
 

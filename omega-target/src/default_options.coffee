@@ -11,6 +11,9 @@ module.exports = ->
   "-showResultProfileOnActionBadgeText": false
   "-showExternalProfile": true
   "-downloadInterval": 1440
+  "-proxyScenes": []
+  "-activeProxyScene": ""
+  "-defaultProxyScene": ""
   "+proxy":
     bypassList: [
       {

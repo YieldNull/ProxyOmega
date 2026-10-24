@@ -54,6 +54,10 @@ $httpProvider, $animateProvider, $compileProvider) ->
       url: '/general'
       templateUrl: 'partials/general.html'
       #controller: 'GeneralCtrl'
+    ).state('scenes',
+      url: '/scenes'
+      templateUrl: 'partials/scenes.html'
+      controller: 'ScenesCtrl'
     ).state('io',
       url: '/io'
       templateUrl: 'partials/io.html'

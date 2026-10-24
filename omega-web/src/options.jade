@@ -29,6 +29,10 @@ html(lang='en' ng-controller='MasterCtrl' ng-csp)
             span.glyphicon.glyphicon-cog
             = ' '
             | {{'options_tab_general' | tr}}
+          li(ui-sref-active='active'): a(ui-sref='scenes')
+            span.glyphicon.glyphicon-map-marker
+            = ' '
+            | {{'options_tab_scenes' | tr}}
           li(ui-sref-active='active'): a(ui-sref='io')
             span.glyphicon.glyphicon-floppy-save
             = ' '

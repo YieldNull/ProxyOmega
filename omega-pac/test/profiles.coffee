@@ -125,6 +125,22 @@ describe 'Profiles', ->
     it 'should not use any proxy for requests matching the bypassList', ->
       testProfile profile, 'ftp://localhost/',
         ['DIRECT', profile.bypassList[0], {scheme: 'direct'}, undefined]
+    it 'should resolve a scene override without changing the saved profile', ->
+      base =
+        name: 'proxy'
+        profileType: 'FixedProfile'
+        fallbackProxy: {scheme: 'http', host: '127.0.0.1', port: 8080}
+        sceneProfiles:
+          office:
+            fallbackProxy: {scheme: 'http', host: '10.0.0.2', port: 8888}
+      options =
+        '-activeProxyScene': 'office'
+        '+proxy': base
+      resolved = Profiles.forSceneOptions(options)
+      resolved['+proxy'].fallbackProxy.host.should.equal('10.0.0.2')
+      base.fallbackProxy.host.should.equal('127.0.0.1')
+      Profiles.forScene(base, {'-activeProxyScene': 'unknown'})
+        .should.equal(base)
   describe 'PacProfile', ->
     profile = Profiles.create('test', 'PacProfile')
     profile.pacScript = '''

@@ -1,0 +1,36 @@
+.page-header
+  h2 {{'options_tab_scenes' | tr}}
+section.settings-group.width-limit
+  p.help-block {{'options_scenes_help' | tr}}
+  .form-group
+    label(for='default-scene') {{'options_scenes_fallback' | tr}}
+    select#default-scene.form-control(ng-model='defaultScene'
+      ng-options='scene.id as scene.name for scene in defaultChoices'
+      ng-change='selectDefaultScene()')
+  .form-group
+    label(for='active-scene') {{'options_scenes_active' | tr}}
+    select#active-scene.form-control(ng-model='activeScene'
+      ng-options='scene.id as scene.name for scene in sceneChoices'
+      ng-change='selectActiveScene()')
+  .form-group
+    label(for='new-scene') {{'options_scenes_new' | tr}}
+    .input-group
+      input#new-scene.form-control(type='text' ng-model='newSceneName'
+        ng-keypress='$event.which == 13 && addScene()')
+      span.input-group-btn
+        button.btn.btn-default(type='button' ng-click='addScene()'
+          ng-disabled='!newSceneName || !newSceneName.trim()')
+          | {{'options_scenes_add' | tr}}
+  .table-responsive(ng-if='scenes.length')
+    table.table.table-bordered.width-limit-lg
+      thead
+        tr
+          th {{'options_scenes_name' | tr}}
+          th
+      tbody
+        tr(ng-repeat='scene in scenes track by scene.id')
+          td
+            input.form-control(type='text' ng-model='scene.name' required)
+          td
+            button.btn.btn-danger.btn-sm(type='button' ng-click='removeScene(scene)')
+              span.glyphicon.glyphicon-trash

@@ -77,6 +77,20 @@ body {
     background-color: #E5E5E5;
   }
 
+  .om-scene label {
+    display: block;
+    padding: 4px 8px 2px;
+    color: #555;
+    font-size: 12px;
+  }
+
+  .om-scene select {
+    box-sizing: border-box;
+    width: calc(100% - 16px);
+    margin: 0 8px 5px;
+    padding: 4px;
+  }
+
   .om-reqinfo {
     background-color: #fcf8e3;
   }
