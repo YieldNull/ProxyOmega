@@ -28,9 +28,14 @@
     </li>
     <li class="om-divider"></li>
     <li class="om-divider" id="js-profiles-end"></li>
-    <li class="om-nav-item om-scene om-hidden">
-      <label for="js-scene-select" id="js-scene-label"></label>
-      <select id="js-scene-select"></select>
+    <li class="om-nav-item om-scene om-has-dropdown om-hidden">
+      <a href="#" id="js-scene-toggle" role="button" aria-haspopup="true" aria-expanded="false">
+        <span class="glyphicon glyphicon-globe"></span>
+        <span id="js-scene-label"></span>
+        <span class="om-scene-current"></span>
+        <span class="om-caret"></span>
+      </a>
+      <ul class="om-dropdown" id="js-scene-menu" role="menu"></ul>
     </li>
     <li class="om-divider om-scene om-hidden"></li>
     <li class="om-nav-item om-nav-addrule">

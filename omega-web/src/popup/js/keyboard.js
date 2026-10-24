@@ -118,6 +118,8 @@
     var container = document.querySelector('.om-open');
     if (container) {
       container.classList.remove('om-open');
+      var toggle = container.querySelector('[aria-expanded]');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
       container.querySelector('a').focus();
     }
   }

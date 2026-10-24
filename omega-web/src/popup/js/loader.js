@@ -6,34 +6,74 @@ $script('../js/omega_target_popup.js', 'om-target', function() {
   function init(){
     OmegaTargetPopup.getProxyScenes(function(err, result) {
       if (err || !result || !result.scenes || !result.scenes.length) return;
-      var select = document.getElementById('js-scene-select');
+      var sceneItem = document.querySelector('.om-scene.om-has-dropdown');
+      var toggle = document.getElementById('js-scene-toggle');
+      var menu = document.getElementById('js-scene-menu');
       var label = document.getElementById('js-scene-label');
-      label.textContent = OmegaTargetPopup.getMessage('options_scenes_active');
+      var current = document.querySelector('.om-scene-current');
+      label.textContent = OmegaTargetPopup.getMessage('popup_scene_label') + ':';
       var defaultName = OmegaTargetPopup.getMessage(
         'options_scenes_followDefault');
-      var defaultScene = result.scenes.find(function(scene) {
-        return scene.id === result.defaultScene;
+      var choices = [{id: '', name: defaultName}].concat(result.scenes);
+      var active = result.active || '';
+      var selected = choices.find(function(scene) {
+        return scene.id === active;
       });
-      if (defaultScene) defaultName += ' (' + defaultScene.name + ')';
-      var choices = [{id: '', name: defaultName}]
-        .concat(result.scenes);
+      current.textContent = selected ? selected.name : defaultName;
+      var pending = false;
+
+      function closeSceneMenu() {
+        sceneItem.classList.remove('om-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+
       choices.forEach(function(scene) {
-        var option = document.createElement('option');
-        option.value = scene.id;
-        option.textContent = scene.name;
-        select.appendChild(option);
-      });
-      select.value = result.active || '';
-      select.addEventListener('change', function() {
-        select.disabled = true;
-        OmegaTargetPopup.setActiveProxyScene(select.value, function(error) {
-          if (error) {
-            select.disabled = false;
-            select.value = result.active || '';
+        var item = document.createElement('li');
+        item.className = 'om-nav-item';
+        if (scene.id === active) item.classList.add('om-active');
+        var link = document.createElement('a');
+        link.href = '#';
+        link.setAttribute('role', 'menuitem');
+        var icon = document.createElement('span');
+        icon.className = 'glyphicon ' +
+          (scene.id ? 'glyphicon-globe' : 'glyphicon-transfer');
+        icon.style.color = scene.id ? '#9ce' : '#aaa';
+        link.appendChild(icon);
+        var text = document.createElement('span');
+        text.textContent = scene.name;
+        link.appendChild(text);
+        link.addEventListener('click', function(event) {
+          event.preventDefault();
+          if (pending) return;
+          if (scene.id === active) {
+            closeSceneMenu();
             return;
           }
-          window.top.close();
+          pending = true;
+          OmegaTargetPopup.setActiveProxyScene(scene.id, function(error) {
+            if (error) {
+              pending = false;
+              closeSceneMenu();
+              return;
+            }
+            window.top.close();
+          });
         });
+        item.appendChild(link);
+        menu.appendChild(item);
+      });
+      toggle.addEventListener('click', function(event) {
+        event.preventDefault();
+        if (pending) return;
+        var open = !sceneItem.classList.contains('om-open');
+        document.querySelectorAll('.om-open').forEach(function(item) {
+          item.classList.remove('om-open');
+        });
+        sceneItem.classList.toggle('om-open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+      document.addEventListener('click', function(event) {
+        if (!sceneItem.contains(event.target)) closeSceneMenu();
       });
       document.querySelectorAll('.om-scene').forEach(function(el) {
         el.classList.remove('om-hidden');

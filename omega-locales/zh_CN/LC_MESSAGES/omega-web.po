@@ -233,6 +233,9 @@ msgstr "选择默认场景；需要时再临时指定当前场景。某个代理
 msgid "options_scenes_active"
 msgstr "当前场景"
 
+msgid "popup_scene_label"
+msgstr "场景"
+
 msgid "options_scenes_fallback"
 msgstr "默认场景"
 

@@ -251,6 +251,9 @@ msgstr "Choose a default scene and, when needed, an active override. Proxy profi
 msgid "options_scenes_active"
 msgstr "Active scene"
 
+msgid "popup_scene_label"
+msgstr "Scene"
+
 msgid "options_scenes_fallback"
 msgstr "Default scene"
 
